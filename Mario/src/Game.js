@@ -93,10 +93,10 @@ Mario.Game.prototype = {
 			piranhaPlant.stateSaved = {};
 						
 			// Foreach piranha plant, add a pipe to hide it
-			var pipe = game.add.sprite(Math.floor(piranhaPlant.body.x-16), piranhaPlant.body.y - 4, 'pipe');
+			/*var pipe = game.add.sprite(Math.floor(piranhaPlant.body.x-16), piranhaPlant.body.y - 4, 'pipe');
 			transparencyGroup.add(pipe);
 			pipe.body.allowGravity = false;
-			pipe.body.collideWorldBounds = false;
+			pipe.body.collideWorldBounds = false;*/
 			
 			// Piranah animations
 			piranhaPlant.tween1 = {running:false};									
@@ -365,6 +365,15 @@ Mario.Game.prototype = {
 		this.audio.powerUp = game.add.audio('audio-powerup');			
 		this.audio.powerUpAppears = game.add.audio('audio-powerup-appears');
 		this.audio.kick = game.add.audio('audio-kick');
+		this.audio.smallJump = game.add.audio('audio-jump-small');
+		this.audio.superJump = game.add.audio('audio-jump-super');
+		this.audio.breakWall = game.add.audio('audio-break-block');
+		this.audio.bump = game.add.audio('audio-bump');
+		this.audio.stageClear = game.add.audio('audio-stage-clear');
+		this.audio.flagPole = game.add.audio('audio-flag-pole');
+		this.audio.fireworks = game.add.audio('audio-fireworks');
+		this.audio.coin = game.add.audio('audio-coin');	
+		
 		
 		//  Being mp3 files these take time to decode, so we can't play them instantly
 		//  Using setDecodedCallback we can be notified when they're ALL ready for use.
@@ -379,13 +388,14 @@ Mario.Game.prototype = {
 	endLevel: function() {
 		
 		// Lance l'animation de mort de Mario (un saut)
-		function launchFirework(game, group, delay, xPosition, yPosition, fireworkNum) {			
-			game.time.events.add(delay, function() {				
+		function launchFirework(game, group, delay, xPosition, yPosition, fireworkNum, sound) {			
+			game.time.events.add(delay, function() {			
 				var fireworkImage = fireworkNum == 1 ? 'firework-yellow' : fireworkNum == 2 ? 'firework-pink' : 'firework-red';
 				var firework = game.add.sprite(xPosition, yPosition, fireworkImage);
 				group.add(firework);
 				firework.animations.add('firework-anim', [0,1,2,3,4], 10, false);
 				firework.animations.play('firework-anim');				
+				sound.play();
 		  }, this);
 		}		
 		
@@ -397,7 +407,8 @@ Mario.Game.prototype = {
 			this.mario.endGameState = 1;
 			var flagTween = this.game.add.tween(this.flag).to( { y: 380 }, 1000, Phaser.Easing.Linear.None);
 			flagTween.start();
-		} else if (!this.mario.tween.isRunning && this.mario.endGameState==1) {
+			this.audio.flagPole.play();
+		} else if (!this.mario.tween.isRunning && this.mario.endGameState==1) {			
 			this.mario.x = this.mario.x + 32
 			this.mario.frame = 12;				
 			this.mario.endGameState = 2;
@@ -406,15 +417,16 @@ Mario.Game.prototype = {
 			this.mario.tween.start();
 			this.mario.endGameState=3;
 		} else if (!this.mario.tween.isRunning && this.mario.endGameState==3) {
+			this.audio.stageClear.play();
 			var castleWall = this.game.add.sprite(this.xGate+32, 384, 'transparency-castle-wall');				
 			this.transparencyGroup.add(castleWall);
 			this.mario.x = this.mario.x + 16;
 			this.mario.y = 416 + (32-this.mario.height);
 			this.mario.endGameState=4;
 			this.mario.animations.play(this.animations[0]+"-anim");	
-			this.mario.tween = this.game.add.tween(this.mario).to( { x: this.xGate}, 2000, Phaser.Easing.Linear.None);
+			this.mario.tween = this.game.add.tween(this.mario).to( { x: this.xGate}, 3000, Phaser.Easing.Linear.None);
 			this.mario.tween.start();								
-			var tween = this.game.add.tween(this.camera).to( { x: this.flag.x -64}, 2000, Phaser.Easing.Linear.None);
+			var tween = this.game.add.tween(this.camera).to( { x: this.flag.x -64}, 3000, Phaser.Easing.Linear.None);
 			tween.start();								
 		} else if (!this.mario.tween.isRunning && this.mario.endGameState==4) {
 			this.mario.endGameState=5;
@@ -439,7 +451,7 @@ Mario.Game.prototype = {
 				var xVariable = Math.floor((Math.random() * 150) + 1);
 				var xPosition = add==1 ? this.xGate + xVariable : this.xGate - xVariable;
 				var yPosition = Math.floor((Math.random() * 100) + 32);				
-				launchFirework(this.game, this.transparencyGroup, i*400, xPosition, yPosition, fireworkNum);
+				launchFirework(this.game, this.transparencyGroup, i*400, xPosition, yPosition, fireworkNum, this.audio.fireworks);
 			}			
 			this.mario.tween = this.game.add.tween(firework).to( { x: firework.x}, 5000, Phaser.Easing.Linear.None);					
 			this.mario.tween.start();			
@@ -638,6 +650,7 @@ Mario.Game.prototype = {
 				// Item is a coin
 				item.kill();				
 				game.coins++;
+				this.audio.coin.play();
 			} else if ((item.type==1 && this.downButton.isDown) || (item.type==2 && this.rightButton.isDown)) {
 				// Transfer down element
 				mario.body.velocity.x =0;
@@ -669,6 +682,7 @@ Mario.Game.prototype = {
 				// Mushroom : if Mario state == 0 (small Mario) -> 1 (big Mario)
 				// Flower : if Mario state == 1 -> Mario flower				
 				item.destroy();
+				this.audio.powerUp.play();
 				if (game.marioState == 0) {
 					mario.growUp = true;
 				} else if (game.marioState == 1) {
@@ -1115,6 +1129,11 @@ Mario.Game.prototype = {
 					this.mario.jumptimer = 1;
 					this.mario.body.velocity.y = -this.mario.constants.VELOCITY_MAX_Y;
 					this.mario.state.canJump = false;
+					if (game.marioState==0) {
+						this.audio.smallJump.play();
+					} else {
+						this.audio.superJump.play();
+					}
 				} else if (this.jumpButton.isDown && (this.mario.jumptimer != 0)) { 
 					//player is no longer on the ground, but is still holding the jump key
 					if (this.mario.jumptimer > this.mario.constants.JUMP_TIMER_MAX) {
@@ -1176,6 +1195,7 @@ Mario.Game.prototype = {
 																									
 							if (game.marioState>0 && collisioningTile.index!=7 && collisioningTile.index!=8) {
 								// Mario is big, this is a wall, explode the wall
+								this.audio.breakWall.play();
 								this.map.removeTile(collisioningTile.x,collisioningTile.y);
 								this.map.removeTile(collisioningTile.x,collisioningTile.y);
 								var brokenWall1 = createBrokenWall(collisioningTile.x*32, collisioningTile.y*32, 'brokenWall_'+this.mapEnv+'_1', -200,-300);
@@ -1194,6 +1214,7 @@ Mario.Game.prototype = {
 								// Mystery box or Mario is small
 								// Play animation here : collisioning tile will move from up to down fastly
 								// 1 - Replace the collisioning tile by an invisible collisioning tile
+								this.audio.bump.play();
 								element.index = collisioningTile.index;						
 								this.map.replace(collisioningTile.index,-1, collisioningTile.x,collisioningTile.y,1,1);
 								// Play the animation on the sprite
@@ -1210,6 +1231,7 @@ Mario.Game.prototype = {
 								// Now we must check if a coin / mushroom / Flower has to be generated
 								if (element.index==7) {
 									// Single coin appears from block
+									this.audio.coin.play();
 									animateCoinFromBlock(this.items, collisioningTile.x, collisioningTile.y-1);
 									game.coins++;
 									// And finally check if an enemy is on the block
@@ -1246,6 +1268,7 @@ Mario.Game.prototype = {
 										// A coin is just above the bloc, get the coin
 										game.coins++;										
 										item.destroy();
+										this.audio.coin.play();
 										animateCoinFromBlock(this.items, collisioningTile.x, collisioningTile.y-1);										
 									}
 								}
@@ -1263,15 +1286,15 @@ Mario.Game.prototype = {
 				
 				if (this.leftButton.isDown) {	
 					this.mario.state.orientation = 0;
-					// On se déplace sur la gauche
+					// On se dï¿½place sur la gauche
 					if (this.mario.body.blocked.left) {
-						// On est bloqué en allant sur la gauche, stopper l'animation en cours, acceleration devient nulle
+						// On est bloquï¿½ en allant sur la gauche, stopper l'animation en cours, acceleration devient nulle
 						this.mario.animations.stop(null, true);
 						this.mario.body.acceleration.x = 0;
 						this.mario.state.running = false;
 					} else {												
 						if (this.mario.state.direction == 1 && this.mario.body.acceleration.x>0) {					
-							// On se déplaçait vers la droite -> on dérape en repartant vers la gauche
+							// On se dï¿½plaï¿½ait vers la droite -> on dï¿½rape en repartant vers la gauche
 							if (this.mario.constants.DECCELERATION_SLIDE >= this.mario.body.acceleration.x) {
 								this.mario.body.acceleration.x = 0;						
 								this.mario.state.sliding = false;
@@ -1368,7 +1391,7 @@ Mario.Game.prototype = {
 					this.shiftJump.shift = false;								
 				}
 													
-				// Ne pas aller plus à gauche que ce qui est en cours d'affichage à l'écran								
+				// Ne pas aller plus ï¿½ gauche que ce qui est en cours d'affichage ï¿½ l'ï¿½cran								
 				if (this.mario.body.x<game.camera.x) {
 					this.mario.body.velocity.x = 0;
 					this.mario.body.acceleration.x = 0;
@@ -1378,7 +1401,7 @@ Mario.Game.prototype = {
 				/***************************************************************************************/
 				/**                                    MOVE BACKGROUND                                 */
 				/***************************************************************************************/
-				// Déplacement du background qui scrolle en fond (pour un scroll auto, soustraire 0.5 à chaque fois)			
+				// Dï¿½placement du background qui scrolle en fond (pour un scroll auto, soustraire 0.5 ï¿½ chaque fois)			
 				if (this.shiftJump.shift == false && this.mario.body.x<=this.flag.x) {
 					this.background.tilePosition.x -= 0.5 * (this.mario.body.x-this.camera.x>=248 ? this.mario.deltaX :0);
 				}
@@ -1422,16 +1445,16 @@ Mario.Game.prototype = {
 					this.mario.body.velocity.y = 0;
 					this.mario.body.acceleration.x = 0;
 					this.mario.body.acceleration.y = 0;
-					// Arrêter la gravité quelques secondes pour afficher l'animation sans bouger
+					// Arrï¿½ter la gravitï¿½ quelques secondes pour afficher l'animation sans bouger
 					this.mario.body.allowGravity = false;
 					this.enemies.forEach(function(enemy){	
-						// Arrêter la gravitation des ennemis
+						// Arrï¿½ter la gravitation des ennemis
 						enemy.body.allowGravity = false;
 						enemy.body.velocity.x = 0;
 						enemy.body.velocity.y = 0;
 						enemy.animations.stop(null, true);
 						if (enemy.enemyType==1) {
-							// Arrêter l'animation des piranha plant
+							// Arrï¿½ter l'animation des piranha plant
 							if (enemy.tween1.isRunning) {
 								enemy.tween1.stop();
 							} else if (enemy.tween2.isRunning) {
@@ -1440,15 +1463,15 @@ Mario.Game.prototype = {
 						}
 					}, this);
 					this.items.forEach(function(item){
-						// Arrêter l'animation des items
+						// Arrï¿½ter l'animation des items
 						item.animations.stop(null, true);					
 					}, this);										
-					// Démarrer l'animation de sa mort (on fait une sorte de saut jusqu'à sortir de l'écran)
+					// Dï¿½marrer l'animation de sa mort (on fait une sorte de saut jusqu'ï¿½ sortir de l'ï¿½cran)
 					launchDeathAnimation(this.mario, 1500);				
 				}
 				
 				if (game.mapFinished) {
-					this.audio.mainTheme.stop();
+					this.audio.mainTheme.stop();					
 					this.mario.body.acceleration.x = 0;					
 					this.mario.body.velocity.x = 0;
 					this.mario.body.acceleration.y = 0;					
@@ -1472,8 +1495,7 @@ Mario.Game.prototype = {
 					this.mario.animations.stop(null, true);						
 					
 					this.mario.loadTexture(this.mario.state.orientation == 0 ? 'mario-grow-up-left' : 'mario-grow-up-right', 0);				
-					if (this.mario.growUp) {
-						this.audio.powerUp.play();
+					if (this.mario.growUp) {						
 						this.growUpAnimation = this.mario.animations.play('mario-grow-up-anim');	
 						this.mario.body.y = this.mario.body.y - 29;
 						this.mario.body.setSize(32-this.mario.constants.X_OFFSET, 61, 2, 0);					
@@ -1501,7 +1523,7 @@ Mario.Game.prototype = {
 				}
 														
 			} else {
-				// Action à effectuer après l'animation de la mort
+				// Action ï¿½ effectuer aprï¿½s l'animation de la mort
 				if (this.mario.body.y>600) {
 					// Mario felt in a hole
 					if (game.lifes>0) {

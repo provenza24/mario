@@ -74,10 +74,17 @@ Mario.Preloader.prototype = {
 		// Audio
 		this.load.audio('audio-main-theme', ['assets/audio/main_theme.ogg']);
 		this.load.audio('audio-die', ['assets/audio/smb_mariodie.ogg']);
+		this.load.audio('audio-kick', ['assets/audio/smb_kick.ogg']);
 		this.load.audio('audio-powerup', ['assets/audio/smb_powerup.ogg']);				
 		this.load.audio('audio-powerup-appears', ['assets/audio/smb_powerup_appears.ogg']);				
-		this.load.audio('audio-kick', ['assets/audio/smb_kick.ogg']);				
-		
+		this.load.audio('audio-jump-small', ['assets/audio/smb_jump-small.ogg']);
+		this.load.audio('audio-jump-super', ['assets/audio/smb_jump-super.ogg']);
+		this.load.audio('audio-break-block', ['assets/audio/smb_breakblock.ogg']);
+		this.load.audio('audio-bump', ['assets/audio/smb_bump.ogg']);
+		this.load.audio('audio-stage-clear', ['assets/audio/smb_stage_clear.ogg']);
+		this.load.audio('audio-flag-pole', ['assets/audio/smb_flagpole.ogg']);
+		this.load.audio('audio-fireworks', ['assets/audio/smb_fireworks.ogg']);
+		this.load.audio('audio-coin', ['assets/audio/smb_coin.ogg']);
 		
 
 	},
