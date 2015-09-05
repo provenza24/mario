@@ -29,6 +29,7 @@
  <layer name="world" width="232" height="15">
   <properties>
    <property name="background" value="background_underworld"/>
+   <property name="music" value="underground-theme"/>
   </properties>
   <data encoding="base64" compression="zlib">
    eJztlklOxDAQRQsWDReAHexYgMTQ7Fg0lAIcgfEGzCdgvjgfREvBuDzFcaet+tJTFNtlJ7Zep7cXiLYVpQJqzKz3VFFyUWNmvaeKkosaw452RZnSZ1zrboKtATxjO08Ffwu43FJFw/T33VhA6vfN6xunyZMh+vmpfnYOk/pZQ9TPusIU9k62cba60Pk0/aSkn6NffFE/08OkftaUUn6OSP2MDbeubdp9thqpzzfOVhc6nzneRJOWEn6OSP1MCRtXqc2skfp846T1QuYzx5vUHBbokjWwDjaoXz9NN1P93EHbLtgD44z+cuC4ZbBk4EtjXGPD9H/vbW1SjVQnzeGq881fMitgtdBaDaWfX5eMwT44oP78tLmZ6meDtmNwAk5n4GdMTC8lT/s8d6b5/25JHk7/88WEKX4/GurfT85ITCQ3U/w8w/05uACX4ApcZ3KU80zzE5+Xkp99nD/T/PspeSi1u76rTHH70VBdfrb3xuVmip83uL8Fd+AePIDHAfkZ6mVJP2tIrJ+u7ypT+Fmbbtbg53RvfG6G+GmOeYaLL+AVvIF38JHJzwk4VJI4Gvhetp9vYrlPfU8zrrm61MbyrcTinBCaL613Cxw=
@@ -41,6 +42,7 @@
    <properties>
     <property name="background" value="background_underworld"/>
     <property name="mapType" value="0"/>
+    <property name="music" value="main-theme"/>
     <property name="xCamera" value="5968"/>
     <property name="xOutgoing" value="5968"/>
     <property name="yOutgoing" value="352"/>

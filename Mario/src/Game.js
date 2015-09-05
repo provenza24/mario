@@ -359,8 +359,14 @@ Mario.Game.prototype = {
 		}
 		
 		this.audio = {};
-		this.audio.mainTheme = game.add.audio('audio-main-theme');
-		this.audio.mainTheme.volume = 0.5;
+		this.audio.musics = [];
+		this.audio.musics['audio-main-theme'] = game.add.audio('audio-main-theme');				
+		if (!(this.layer.layer.properties.music==='main-theme')) {
+			this.audio.musics['audio-'+this.layer.layer.properties.music] = game.add.audio('audio-'+this.layer.layer.properties.music);
+		}
+		this.audio.currentTheme = this.audio.musics['audio-'+this.layer.layer.properties.music];
+		this.audio.currentTheme.volume = 0.5;
+		
 		this.audio.die = game.add.audio('audio-die');	
 		this.audio.powerUp = game.add.audio('audio-powerup');			
 		this.audio.powerUpAppears = game.add.audio('audio-powerup-appears');
@@ -487,7 +493,7 @@ Mario.Game.prototype = {
 			pausedText.destroy();
 			// unpause the game
 			this.game.paused = false;
-			this.audio.mainTheme.play();
+			this.audio.currentTheme.play();
 		}, this);	
 	},
 	/**************************************************************************************************************************************************************************/
@@ -676,6 +682,12 @@ Mario.Game.prototype = {
 					this.background.frame = 0;
 					this.background.fixedToCamera = true;
 					this.backgroundGroup.add(this.background);									
+				}
+				// New music to play
+				if (item.music !=undefined) {
+					this.audio.currentTheme.stop();
+					this.audio.currentTheme = this.audio.musics['audio-'+item.music];
+					this.audio.currentTheme.play();
 				}
 				
 			} else if (item.type==4 && !this.transfer) {
@@ -1438,7 +1450,7 @@ Mario.Game.prototype = {
 				/**                                 MARIO'S DEATH HANDLING                             */
 				/***************************************************************************************/
 				if (this.mario.alive == false) {
-					this.audio.mainTheme.stop();
+					this.audio.currentTheme.stop();
 					this.audio.die.play();
 					game.lifes--;
 					// Changer l'animation du personnage
@@ -1474,7 +1486,7 @@ Mario.Game.prototype = {
 				}
 				
 				if (game.mapFinished) {
-					this.audio.mainTheme.stop();					
+					this.audio.currentTheme.stop();					
 					this.mario.body.acceleration.x = 0;					
 					this.mario.body.velocity.x = 0;
 					this.mario.body.acceleration.y = 0;					

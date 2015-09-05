@@ -7,7 +7,8 @@
          "opacity":1,
          "properties":
             {
-             "background":"background_underworld"
+             "background":"background_underworld",
+             "music":"underground-theme"
             },
          "type":"tilelayer",
          "visible":true,
@@ -61,6 +62,7 @@
                     {
                      "background":"background_underworld",
                      "mapType":"0",
+                     "music":"main-theme",
                      "xCamera":"5968",
                      "xOutgoing":"5968",
                      "yOutgoing":"352"

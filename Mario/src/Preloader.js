@@ -73,6 +73,7 @@ Mario.Preloader.prototype = {
 
 		// Audio
 		this.load.audio('audio-main-theme', ['assets/audio/main_theme.ogg']);
+		this.load.audio('audio-underground-theme', ['assets/audio/underground_theme.ogg']);
 		this.load.audio('audio-die', ['assets/audio/smb_mariodie.ogg']);
 		this.load.audio('audio-kick', ['assets/audio/smb_kick.ogg']);
 		this.load.audio('audio-powerup', ['assets/audio/smb_powerup.ogg']);				
