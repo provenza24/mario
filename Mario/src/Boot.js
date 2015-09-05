@@ -8,7 +8,7 @@ Mario.Boot.prototype = {
 	create: function(){
 		// set scale options		
 		this.input.maxPointers = 1;
-		this.scale.scaleMode = Phaser.ScaleManager.NO_SCALE ; //SHOW_ALL, NO_SCALE		
+		this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL ; //SHOW_ALL, NO_SCALE		
 		this.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE ; //SHOW_ALL, NO_SCALE		
 		this.scale.pageAlignHorizontally = true;
 		this.scale.pageAlignVertically = false;
