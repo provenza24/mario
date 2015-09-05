@@ -372,7 +372,9 @@ Mario.Game.prototype = {
 		this.audio.stageClear = game.add.audio('audio-stage-clear');
 		this.audio.flagPole = game.add.audio('audio-flag-pole');
 		this.audio.fireworks = game.add.audio('audio-fireworks');
-		this.audio.coin = game.add.audio('audio-coin');	
+		this.audio.coin = game.add.audio('audio-coin');
+		this.mario.audio = {};
+		this.mario.audio.pipe = game.add.audio('audio-pipe');
 		
 		
 		//  Being mp3 files these take time to decode, so we can't play them instantly
@@ -721,6 +723,7 @@ Mario.Game.prototype = {
 				mario.growDown = true;
 				mario.invincible = true;
 				mario.invincibleCount = 0;
+				mario.audio.pipe.play();
 			} else {
 				mario.alive = false;
 			}					

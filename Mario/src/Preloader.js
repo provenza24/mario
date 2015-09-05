@@ -85,6 +85,7 @@ Mario.Preloader.prototype = {
 		this.load.audio('audio-flag-pole', ['assets/audio/smb_flagpole.ogg']);
 		this.load.audio('audio-fireworks', ['assets/audio/smb_fireworks.ogg']);
 		this.load.audio('audio-coin', ['assets/audio/smb_coin.ogg']);
+		this.load.audio('audio-pipe', ['assets/audio/smb_pipe.ogg']);
 		
 
 	},
