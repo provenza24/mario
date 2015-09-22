@@ -78,6 +78,32 @@ Mario.Game.prototype = {
 			goomba.killed = false;
 			goomba.stateSaved = {};
 		}	
+		
+		function initKoopa(koopa) {				
+			koopa.alive = false;
+			koopa.enemyType = 2;
+			koopa.animations.add('koopa-anim', [0,1], 6, true);
+			koopa.animations.add('koopa-stand-anim', [2]);
+			koopa.animations.add('koopa-carapace-anim', [2,3,4], 20, true );
+			koopa.animations.play('koopa-anim');									
+			koopa.body.velocity.x = 0;			
+			koopa.body.bounce.y = 0;		
+			koopa.body.mass = 60;		
+			koopa.body.linearDamping = 1;
+			koopa.body.collideWorldBounds = true;	
+			koopa.body.allowGravity = false;
+			koopa.body.setSize(28, 32, 2, 0);
+			koopa.body.velocity.x = 0;
+			koopa.body.bounce.x = 1;
+			koopa.initialized = false;
+			if (koopa.xAlive ==undefined || koopa.xAlive ==null) {
+				koopa.xAlive = koopa.x - 520;
+			}
+			koopa.killed = false;
+			koopa.stateSaved = {};
+			koopa.body.setSize(32, 30, 0, 18);
+			koopa.state = 0;
+		}	
 
 		function initPiranhaPlant(piranhaPlant, transparencyGroup) {						
 			piranhaPlant.finalPosition = piranhaPlant.y-47;		
@@ -144,9 +170,11 @@ Mario.Game.prototype = {
 		this.showBackgroundButton = game.input.keyboard.addKey(Phaser.Keyboard.FIVE);		
 		this.scaleButton = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.nextLevelButton = game.input.keyboard.addKey(Phaser.Keyboard.N);		
+		this.restartLevelButton = game.input.keyboard.addKey(Phaser.Keyboard.R);
+		
 		
 		// Special keys for debug
-		this.keyboard = {debugCustom:false, debugPhysics:false, debugBounds:false, debugFps:false, showBackground: true, scale: true, nextLevel:false, fireBall:false};
+		this.keyboard = {restartLevel:false, debugCustom:false, debugPhysics:false, debugBounds:false, debugFps:false, showBackground: true, scale: true, nextLevel:false, fireBall:false};
 		
 		// Debuging
 		game.time.advancedTiming = false;
@@ -164,7 +192,8 @@ Mario.Game.prototype = {
 		this.backgroundGroup = game.add.group();		
 			
 		// Tilemap
-		var levelToLoad = 'level_' + game.worldNumber + '_' + game.levelNumber;
+		//var levelToLoad = 'level_' + game.worldNumber + '_' + game.levelNumber;
+		var levelToLoad = 'level_test';
 		this.map = game.add.tilemap(levelToLoad);
 		this.map.addTilesetImage('Tileset', 'tiles');		
 		this.map.setCollisionBetween(0, 200);		
@@ -243,6 +272,14 @@ Mario.Game.prototype = {
 			var piranhaPlant = this.enemies.children[i];
 			initPiranhaPlant(piranhaPlant, this.transparencyGroup);					
 		}	
+		enemyIndex = this.enemies.children.length;
+		
+		// Add enemies - Koopa
+		this.map.createFromObjects('objectsLayer',416, 'koopa', 0, true, false, this.enemies);
+		for (var i=enemyIndex; i< this.enemies.children.length; i++) {
+			var koopa = this.enemies.children[i];
+			initKoopa(koopa);					
+		}
 					
 		game.physics.enable(this.enemies);	
 		
@@ -331,9 +368,9 @@ Mario.Game.prototype = {
 		
 		switchFullScreenMode();*/
 				
-		/*this.mario.x = 4370;		
-		this.mario.y = 259;		
-		this.camera.x = 4165;*/
+		/*this.mario.x = 2918;		
+		this.mario.y = 416;		
+		this.camera.x = 2670;*/
 		
 
 		
@@ -388,7 +425,10 @@ Mario.Game.prototype = {
 		//  The audio files could decode in ANY order, we can never be sure which it'll be.
 		/*var sounds = [ this.audio.mainTheme, this.audio.die, this.audio.powerUp, this.audio.powerUpAppears, this.audio.kick];
 		game.sound.setDecodedCallback(sounds, this.preinitGame(), this);*/
-				
+		
+		/*game.time.desiredFps = 30;
+		game.forceSingleUpdate = true;*/
+		
 		// Finally, launch preinitGame method which wait the user to enter start button to play
 		this.preinitGame();			
 				
@@ -749,9 +789,10 @@ Mario.Game.prototype = {
 					hitMario(mario);
 				}
 			} else {
-				if (!enemy.killed) {
-					// Goomba -> check if we were falling and Mario feet are at least at mid-hight of the enemy hight					
+				if (!enemy.killed) {					
+					// Goomba / Koopa -> check if we were falling and Mario feet are at least at mid-hight of the enemy hight					
 					var marioY = mario.body.y;
+					var enemyX = enemy.body.X;
 					var enemyY = enemy.body.y;
 					var marioX = mario.body.x + mario.constants.X_OFFSET;
 					var marioWidth = mario.body.width;
@@ -761,13 +802,38 @@ Mario.Game.prototype = {
 					var enemyHeight = enemy.body.height;				
 					var onTop =  mario.body.velocity.y >0 && (((marioY + marioHeight) - (enemyY + enemyHeight/2))<0) && ((marioX>=enemy.body.x-4 && marioX<=(enemy.body.x+32)) || (marioRightX>=enemy.body.x-4 && marioRightX<(enemy.body.x+32)));			
 					if (onTop) {	
-						// Mario kills the enemy		
-						this.audio.kick.play();	
-						killEnemy(enemy, 0, 0, 2, false);
-						removeAfterDelay(enemy, 500);	
-						mario.body.velocity.y = -400;								
-					} else if (!mario.invincible) {
-						hitMario(mario);												
+						if (enemy.enemyType==0) {
+							// Goomba -> kill him
+							this.audio.kick.play();	
+							killEnemy(enemy, 0, 0, 2, false);
+							removeAfterDelay(enemy, 500);	
+							mario.body.velocity.y = -400;
+						} else if (enemy.enemyType==2)  {
+							// Koopa
+							if (enemy.state==0 || enemy.state==2) {
+								enemy.body.acceleration.x = 0;
+								enemy.body.velocity.x = 0;
+								enemy.animations.play('koopa-stand-anim');
+								mario.body.velocity.y = -400;
+								enemy.state=1;								
+							} else if (enemy.state==1) {								
+								mario.body.velocity.y = -400;
+								
+								enemy.body.velocity.x = marioX<=enemyX ? 300 : -300;
+								enemy.animations.play('koopa-carapace-anim');
+								enemy.state=2;				
+							} 
+						}
+					} else if (!mario.invincible) {						
+						if (enemy.enemyType==2 && enemy.state==1) {
+							// Koopa, carapace standing							
+							enemy.body.x = mario.state.orientation==1 ? mario.body.x + 32 : mario.body.x-32;
+							enemy.body.velocity.x = mario.state.orientation==1 ? 300 : -300;
+							enemy.animations.play('koopa-carapace-anim');
+							enemy.state=2;
+						} else {
+							hitMario(mario);
+						}
 					}
 				}			
 			}
@@ -778,6 +844,13 @@ Mario.Game.prototype = {
 			goomba.body.gravity.y = 1600;
 			goomba.body.velocity.x = -65;
 			goomba.initialized = true;
+		}
+		
+		function awakeKoopa(koompa) {
+			koompa.body.allowGravity = true;
+			koompa.body.gravity.y = 1600;
+			koompa.body.velocity.x = -65;
+			koompa.initialized = true;
 		}
 		
 		function movePiranhaPlant(piranhaPlant, xMarioPosition) {
@@ -898,13 +971,24 @@ Mario.Game.prototype = {
 		
 		if (this.nextLevelButton.isDown) {
 			if (this.keyboard.nextLevel==false) {
-				this.keyboard.nextLevel = true;				
-				this.game.levelNumber++;
+				this.keyboard.nextLevel = true;	
+				this.audio.currentTheme.stop();
+				this.game.levelNumber++;				
 				this.restartLevel();
 			}			
 		} else {
 			this.keyboard.nextLevel = false;
-		}		
+		}
+		
+		if (this.restartLevelButton.isDown) {
+			if (this.keyboard.restartLevel==false) {
+				this.keyboard.restartLevel = true;
+				this.audio.currentTheme.stop();
+				this.restartLevel();
+			}			
+		} else {
+			this.keyboard.restartLevel = false;
+		}
 		
 		this.transfer = false;
 		
@@ -943,7 +1027,10 @@ Mario.Game.prototype = {
 		} else  {	
 			
 			if (this.mario.alive) {
-						
+				
+				// Collisions Mario <-> layer
+				game.physics.arcade.collide(this.mario, this.layer);
+				
 				var xAcceleration = this.accelerationButton.isDown ? this.mario.constants.ACCELERATION_FAST : this.mario.constants.ACCELERATION;
 				var xAccelerationMax = this.accelerationButton.isDown ? this.mario.constants.ACCELERATION_FAST_MAX : this.mario.constants.ACCELERATION_MAX;
 				
@@ -1013,9 +1100,11 @@ Mario.Game.prototype = {
 							// Enemy is alive, initialize/move the enemy
 							if (enemy.enemyType==0 && !enemy.initialized) {
 								// Goomba -> move from left to right (and reverse move when colliding a wall)
-								awakeGoomba(enemy);
-								
-							} else if (enemy.enemyType == 1 && !enemy.tween1.isRunning && !enemy.tween2.isRunning)  {								
+								awakeGoomba(enemy);								
+							} else if (enemy.enemyType==2 && !enemy.initialized) {
+								// Koopa -> move from left to right (and reverse move when colliding a wall)
+								awakeKoopa(enemy);	
+							} else if (enemy.enemyType == 1 && !enemy.tween1.isRunning && !enemy.tween2.isRunning)  {															
 								movePiranhaPlant(enemy, this.mario.body.x);												
 							}	
 							// Collisions enemy <-> mario
@@ -1058,7 +1147,24 @@ Mario.Game.prototype = {
 					for (var j=i+1;j<this.enemies.length-1;j++) {
 						var enemy2 = this.enemies.getAt(j);
 						if (enemy1.alive && enemy2.alive && !enemy1.killed && !enemy2.killed) {
+							var velocityEnemy1 = enemy1.body.velocity.x;
+							var velocityEnemy2 = enemy2.body.velocity.x;
 							game.physics.arcade.collide(enemy1, enemy2);
+							// Koopa collision : if state == 1 (caparace immobile)
+							if (enemy1.enemyType==2 && enemy1.state==1) {
+								console.log("koopa case 1");
+							} else if (enemy2.enemyType==2) {
+								if (enemy1.body.touching.left || enemy1.body.touching.right || enemy2.body.touching.left || enemy2.body.touching.right) {
+									if (enemy2.state==1) {
+										console.log("koopa case 2");
+										enemy1.body.velocity.x = -velocityEnemy1;									
+										enemy2.body.velocity.x = 0;	
+									} else if (enemy2.state==2) {
+										enemy2.body.velocity.x = velocityEnemy2;																					
+										killEnemy(enemy1, -150, -200, 3, true);
+									}									
+								}								
+							}																																			
 						}
 					}
 					if (enemy1.alive && !enemy1.killed) {
@@ -1067,8 +1173,7 @@ Mario.Game.prototype = {
 					}
 				}				
 				
-				// Collisions Mario <-> layer
-				game.physics.arcade.collide(this.mario, this.layer);								
+												
 				
 				// Collisions Mario <-> Items
 				game.physics.arcade.overlap(this.mario, this.items, collideItems, null, this);																

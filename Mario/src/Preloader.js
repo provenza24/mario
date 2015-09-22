@@ -27,6 +27,7 @@ Mario.Preloader.prototype = {
 		// Tilemap
 		this.load.tilemap('level_1_1', 'assets/tilemaps/level_1_1.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.tilemap('level_1_2', 'assets/tilemaps/level_1_2.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('level_test', 'assets/tilemaps/test.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('tiles', 'assets/tilemaps/tileset.png');		
 		
 		// Items
@@ -45,6 +46,7 @@ Mario.Preloader.prototype = {
 		// Ennemies
 		this.load.spritesheet('goomba', 'assets/images/enemies/goomba.png', 32, 32);
 		this.load.spritesheet('piranhaPlant', 'assets/images/enemies/plant_piranha.png', 32, 50);
+		this.load.spritesheet('koopa', 'assets/images/enemies/koopa.png', 32, 48);
 		
 		// Effects
 		this.load.spritesheet('coin-explosion', 'assets/images/effects/coin_explosion.png', 40, 32);
